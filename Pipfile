@@ -1,4 +1,6 @@
 [packages]
+educabiz = "*"
+python-telegram-bot = "*"
 
 [dev-packages]
 ruff = "*"
