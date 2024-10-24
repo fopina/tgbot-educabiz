@@ -2,6 +2,8 @@
 educabiz = "*"
 python-dotenv = "*"
 python-telegram-bot = {extras = ["webhooks"], version = "*"}
+# FIXME: this should be in python-educabiz!
+requests = "*"
 
 [dev-packages]
 ruff = "*"
