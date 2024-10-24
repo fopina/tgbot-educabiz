@@ -19,5 +19,16 @@ class Env:
         value = os.environ.get(key, default)
         return value
 
+    def group(self, prefix: str) -> dict[str, str]:
+        r = {}
+        for key in os.environ:
+            if key.startswith(prefix):
+                if self._file and key.endswith('_FILE'):
+                    value = self(key[:-5])
+                else:
+                    value = self(key)
+                r[key[len(prefix) :]] = value
+        return r
+
 
 env = Env()
