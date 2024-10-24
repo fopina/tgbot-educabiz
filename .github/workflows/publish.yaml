@@ -44,3 +44,11 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:${{ github.sha }}
             ghcr.io/${{ github.repository }}:latest
+
+      - name: Summary
+        run: |
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ### Pushed images
+          * ghcr.io/${{ github.repository }}:${{ github.sha }}
+          * ghcr.io/${{ github.repository }}:latest
+          EOF
