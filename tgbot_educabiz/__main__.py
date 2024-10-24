@@ -2,6 +2,8 @@
 
 import logging
 
+from educabiz.client import Client
+
 from .bot import Bot
 from .env import env
 
@@ -13,8 +15,36 @@ logging.getLogger('httpx').setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
+def setup_educabiz():
+    ebs = {}
+    logins = env.group('TGEB_LOGIN_')
+
+    for k, v in logins.items():
+        profile, key = k.split('_', 1)
+        if profile not in ebs:
+            ebs[profile] = Client()
+        if key == 'USERNAME':
+            ebs[profile]._username = v
+        elif key == 'PASSWORD':
+            ebs[profile]._password = v
+
+    chat_map = {}
+    chat_ids = env.group('TGEB_CHATID_')
+    for k, v in chat_ids.items():
+        profiles = v.split(',')
+        for profile in profiles:
+            if profile not in ebs:
+                raise Exception(f'{profile} not defined, review your environment')
+        chat_map[k] = profiles
+
+    return (chat_map, ebs)
+
+
 def main() -> None:
     """Start the bot."""
+
+    # ebs = setup_educabiz()
+
     bot = Bot(
         env('TGEB_TOKEN'),
         webhook_port=env('TGEB_WEBHOOK_PORT', 9999),
