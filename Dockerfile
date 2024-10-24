@@ -14,6 +14,8 @@ RUN pipenv requirements > x.txt \
 
 COPY tgbot_educabiz tgbot_educabiz
 
+EXPOSE 9999
+
 ENTRYPOINT [ "python3", "-m", "tgbot_educabiz" ]
 
 # ------ #

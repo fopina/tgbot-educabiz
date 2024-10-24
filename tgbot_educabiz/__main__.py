@@ -2,10 +2,12 @@
 
 import logging
 import os
+import uuid
 
 import dotenv
-from telegram import ForceReply, Update
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram import Update
+
+from .bot import setup_app
 
 dotenv.load_dotenv()
 
@@ -17,41 +19,23 @@ logging.getLogger('httpx').setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
-# Define a few command handlers. These usually take the two arguments update and
-# context.
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send a message when the command /start is issued."""
-    user = update.effective_user
-    await update.message.reply_html(
-        rf'Hi {user.mention_html()}!',
-        reply_markup=ForceReply(selective=True),
-    )
-
-
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send a message when the command /help is issued."""
-    await update.message.reply_text('Help!')
-
-
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the user message."""
-    await update.message.reply_text(update.message.text)
-
-
 def main() -> None:
     """Start the bot."""
-    # Create the Application and pass it your bot's token.
-    application = Application.builder().token(os.getenv('TGEB_TOKEN')).build()
-
-    # on different commands - answer in Telegram
-    application.add_handler(CommandHandler('start', start))
-    application.add_handler(CommandHandler('help', help_command))
-
-    # on non command i.e message - echo the message on Telegram
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+    application = setup_app(os.getenv('TGEB_TOKEN'))
 
     # Run the bot until the user presses Ctrl-C
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    webhook_url = os.getenv('TGEB_WEBHOOK_URL')
+    if webhook_url:
+        # TODO: check with upstream if random secret_token should not be handled BY DEFAULT
+        secure_uuid = uuid.uuid4()
+        application.run_webhook(
+            port=os.getenv('TGEB_WEBHOOK_PORT', 9999),
+            webhook_url=webhook_url,
+            secret_token=secure_uuid,
+            allowed_updates=Update.ALL_TYPES,
+        )
+    else:
+        application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == '__main__':
