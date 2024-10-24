@@ -32,6 +32,7 @@ def setup_educabiz():
     chat_ids = env.group('TGEB_CHATID_')
     for k, v in chat_ids.items():
         profiles = v.split(',')
+        k = int(k)
         chat_map[k] = []
         for profile in profiles:
             if profile not in ebs:
@@ -44,12 +45,13 @@ def setup_educabiz():
 def main() -> None:
     """Start the bot."""
 
-    # ebs = setup_educabiz()
+    chat_ids = setup_educabiz()
 
     bot = Bot(
         env('TGEB_TOKEN'),
         webhook_port=env('TGEB_WEBHOOK_PORT', 9999),
         webhook_url=env('TGEB_WEBHOOK_URL'),
+        chat_ids=chat_ids,
     )
     bot.run()
 

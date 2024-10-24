@@ -3,7 +3,7 @@
 
 import uuid
 
-from telegram import ForceReply, Update
+from telegram import ForceReply, Update, User
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
 
@@ -19,12 +19,18 @@ class Bot:
         self._webhook_url = webhook_url
         self._webhook_port = webhook_port
         self._secret_token = uuid.uuid4()
+        self._chat_ids = chat_ids
+
+    def is_authorized(self, user: User):
+        return user is not None and user.id in self._chat_ids
 
     # Define a few command handlers. These usually take the two arguments update and
     # context.
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Send a message when the command /start is issued."""
         user = update.effective_user
+        if not self.is_authorized(user):
+            return
         await update.message.reply_html(
             rf'Hi {user.mention_html()}!',
             reply_markup=ForceReply(selective=True),
@@ -32,10 +38,14 @@ class Bot:
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Send a message when the command /help is issued."""
+        if not self.is_authorized(update.effective_user):
+            return
         await update.message.reply_text('Help!')
 
     async def echo(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Echo the user message."""
+        if not self.is_authorized(update.effective_user):
+            return
         await update.message.reply_text(update.message.text)
 
     def setup_app(self) -> Application:
