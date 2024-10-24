@@ -12,4 +12,3 @@
 * [ ] Replace `LICENSE` if MIT does not apply
 * [ ] Search the project for `# TODO` to find the (minimum list of) places that need to be changed.
 * [ ] Add PYPI credentials to secrets
-
