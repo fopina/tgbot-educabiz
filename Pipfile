@@ -1,9 +1,9 @@
 [packages]
-educabiz = "*"
 python-dotenv = "*"
 python-telegram-bot = {extras = ["webhooks"], version = "*"}
 # FIXME: this should be in python-educabiz!
 requests = "*"
+educabiz = {version = "*", index = "testpypi"}
 
 [dev-packages]
 ruff = "*"
@@ -12,3 +12,13 @@ pytest-cov = "*"
 
 [requires]
 python_version = "3.10"
+
+[[source]]
+url = "https://pypi.org/simple/"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "https://test.pypi.org/simple/"
+verify_ssl = true
+name = "testpypi"

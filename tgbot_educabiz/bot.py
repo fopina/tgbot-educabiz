@@ -1,10 +1,14 @@
 #!/usr/bin/env -S python3 -u
 
 
+from typing import TYPE_CHECKING
 import uuid
 
 from telegram import ForceReply, Update, User
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+
+if TYPE_CHECKING:
+    from educabiz.client import Client as EBClient
 
 
 class Bot:
@@ -13,7 +17,7 @@ class Bot:
         token: str,
         webhook_url: str = None,
         webhook_port: int = None,
-        chat_ids: dict[str, list[str]] = None,
+        chat_ids: dict[str, list['EBClient']] = None,
     ):
         self._token = token
         self._webhook_url = webhook_url
@@ -23,6 +27,9 @@ class Bot:
 
     def is_authorized(self, user: User):
         return user is not None and user.id in self._chat_ids
+    
+    def get_chat_ids(self, user: User):
+        return self._chat_ids.get(user.id) or []
 
     # Define a few command handlers. These usually take the two arguments update and
     # context.
@@ -31,6 +38,16 @@ class Bot:
         user = update.effective_user
         if not self.is_authorized(user):
             return
+        ebs = self.get_chat_ids(user)
+        for eb in ebs:
+            # FIXME: handle this in python-educabiz
+            eb.login(eb._username, eb._password)
+        for eb in ebs:
+            data = eb.home()
+            #print(f'School: {data["schoolname"]}')
+            for child_id, child in data['children'].items():
+                print(f'{child_id}:')
+                print(f'* Name: {child["name"]}')
         await update.message.reply_html(
             rf'Hi {user.mention_html()}!',
             reply_markup=ForceReply(selective=True),
