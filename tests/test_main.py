@@ -8,7 +8,7 @@ from . import Base
 
 class Test(Base):
     def test_setup_educabiz_empty(self):
-        self.assertEqual(tgmain.setup_educabiz(), {})
+        self.assertEqual(tgmain.setup_educabiz(), ({}, {}))
 
     def test_setup_educabiz(self):
         os.environ.update(
