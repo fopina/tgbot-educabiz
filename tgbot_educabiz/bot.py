@@ -8,7 +8,13 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 
 
 class Bot:
-    def __init__(self, token: str, webhook_url: str = None, webhook_port: int = None):
+    def __init__(
+        self,
+        token: str,
+        webhook_url: str = None,
+        webhook_port: int = None,
+        chat_ids: dict[str, list[str]] = None,
+    ):
         self._token = token
         self._webhook_url = webhook_url
         self._webhook_port = webhook_port

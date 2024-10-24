@@ -32,12 +32,13 @@ def setup_educabiz():
     chat_ids = env.group('TGEB_CHATID_')
     for k, v in chat_ids.items():
         profiles = v.split(',')
+        chat_map[k] = []
         for profile in profiles:
             if profile not in ebs:
                 raise Exception(f'{profile} not defined, review your environment')
-        chat_map[k] = profiles
+            chat_map[k].append(ebs[profile])
 
-    return (chat_map, ebs)
+    return chat_map
 
 
 def main() -> None:

@@ -8,7 +8,7 @@ from . import Base
 
 class Test(Base):
     def test_setup_educabiz_empty(self):
-        self.assertEqual(tgmain.setup_educabiz(), ({}, {}))
+        self.assertEqual(tgmain.setup_educabiz(), {})
 
     def test_setup_educabiz(self):
         os.environ.update(
@@ -20,8 +20,7 @@ class Test(Base):
                 'TGEB_CHATID_11111': 'U1,U2',
             }
         )
-        chats, ebs = tgmain.setup_educabiz()
-        self.assertEqual(ebs, {'U1': mock.ANY, 'U2': mock.ANY})
-        self.assertEqual(chats, {'11111': ['U1', 'U2']})
-        self.assertEqual(ebs['U1']._username, 'u1')
-        self.assertEqual(ebs['U2']._username, 'u2')
+        chats = tgmain.setup_educabiz()
+        self.assertEqual(chats, {'11111': [mock.ANY, mock.ANY]})
+        self.assertEqual(chats['11111'][0]._username, 'u1')
+        self.assertEqual(chats['11111'][1]._username, 'u2')
