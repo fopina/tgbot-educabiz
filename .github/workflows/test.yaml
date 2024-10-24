@@ -63,3 +63,10 @@ jobs:
           cache-from: ghcr.io/${{ github.repository }}:latest-build-cache
           tags: |
             ghcr.io/${{ github.repository }}:${{ steps.sanitize_branch.outputs.sanitized_branch }}
+
+      - name: Summary
+        run: |
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ### Pushed images
+          * ghcr.io/${{ github.repository }}:${{ steps.sanitize_branch.outputs.sanitized_branch }}
+          EOF
