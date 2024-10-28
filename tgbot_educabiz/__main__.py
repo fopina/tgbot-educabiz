@@ -21,6 +21,7 @@ def setup_educabiz():
 
     for k, v in logins.items():
         profile, key = k.split('_', 1)
+        # FIXME: update python-educabiz to make this prettier (init with login?)
         if profile not in ebs:
             ebs[profile] = Client()
         if key == 'USERNAME':
