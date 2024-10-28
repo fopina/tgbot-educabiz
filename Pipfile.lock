@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c7fd1605f4515f03c0bed62c270f68ca577c421f2faaeed5c44128c0b3cdcb4e"
+            "sha256": "0ec9df4cde42dfae679621c042bac590aa74f14975fdd7b6c8874c5040535cb0"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -10,12 +10,7 @@
         "sources": [
             {
                 "name": "pypi",
-                "url": "https://pypi.org/simple/",
-                "verify_ssl": true
-            },
-            {
-                "name": "testpypi",
-                "url": "https://test.pypi.org/simple/",
+                "url": "https://pypi.org/simple",
                 "verify_ssl": true
             }
         ]
@@ -150,12 +145,12 @@
         },
         "educabiz": {
             "hashes": [
-                "sha256:4e4ad74e222e73d831a2c17f2420e34434017745dc7dc5038cadb38ff4e1d44a",
-                "sha256:5dc51965b26f22c6d672c149fef4293b406cacdd986f617412f0282af18a926c"
+                "sha256:8ed3506a3e44059d2e3e123ebd8328c3f800cac4ce414e5a6cd357360bc4be68",
+                "sha256:fdb070387b0902b7bf1f8b41a0a77f16e0fa68c5149acb79de07a1611daf4507"
             ],
-            "index": "testpypi",
+            "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==5.0.0"
+            "version": "==0.0.2"
         },
         "exceptiongroup": {
             "hashes": [
