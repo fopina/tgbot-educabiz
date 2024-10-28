@@ -25,6 +25,7 @@ class Env:
             if key.startswith(prefix):
                 if self._file and key.endswith('_FILE'):
                     value = self(key[:-5])
+                    key = key[:-5]
                 else:
                     value = self(key)
                 r[key[len(prefix) :]] = value

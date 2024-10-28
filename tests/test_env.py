@@ -30,4 +30,4 @@ class Test(Base):
                     'TG_OL_B_P_FILE': f.name,
                 }
             )
-            self.assertEqual(env.group('TG_OL_'), {'A_U': '1', 'A_P': '2', 'B_U': '3', 'B_P_FILE': 'testing'})
+            self.assertEqual(env.group('TG_OL_'), {'A_U': '1', 'A_P': '2', 'B_U': '3', 'B_P': 'testing'})
