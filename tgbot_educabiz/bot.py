@@ -115,7 +115,7 @@ class Bot:
         query = update.callback_query
         if opts:
             ebi, child_id, *tail = opts[0].split(' ', 2)
-            eb: 'EBClient' = self.get_chat_ids(update.effective_user)[ebi]
+            eb: 'EBClient' = self.get_chat_ids(update.effective_user)[int(ebi)]
             # FIXME: remove print()s over proper checks
             if tail == ['checkin']:
                 print(eb.child_check_in(child_id))
