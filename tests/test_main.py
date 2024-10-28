@@ -21,6 +21,6 @@ class Test(Base):
             }
         )
         chats = tgmain.setup_educabiz()
-        self.assertEqual(chats, {'11111': [mock.ANY, mock.ANY]})
-        self.assertEqual(chats['11111'][0]._username, 'u1')
-        self.assertEqual(chats['11111'][1]._username, 'u2')
+        self.assertEqual(chats, {11111: [mock.ANY, mock.ANY]})
+        self.assertEqual(chats[11111][0]._username, 'u1')
+        self.assertEqual(chats[11111][1]._username, 'u2')
