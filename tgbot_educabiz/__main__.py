@@ -1,13 +1,11 @@
 #!/usr/bin/env -S python3 -u
 
 import logging
-import os
 
-import dotenv
-from telegram import ForceReply, Update
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from educabiz.client import Client
 
-dotenv.load_dotenv()
+from .bot import Bot
+from .env import env
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -17,41 +15,46 @@ logging.getLogger('httpx').setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
-# Define a few command handlers. These usually take the two arguments update and
-# context.
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send a message when the command /start is issued."""
-    user = update.effective_user
-    await update.message.reply_html(
-        rf'Hi {user.mention_html()}!',
-        reply_markup=ForceReply(selective=True),
-    )
+def setup_educabiz():
+    ebs = {}
+    logins = env.group('TGEB_LOGIN_')
 
+    for k, v in logins.items():
+        profile, key = k.split('_', 1)
+        # FIXME: update python-educabiz to make this prettier (init with login?)
+        if profile not in ebs:
+            ebs[profile] = Client()
+        if key == 'USERNAME':
+            ebs[profile]._username = v
+        elif key == 'PASSWORD':
+            ebs[profile]._password = v
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send a message when the command /help is issued."""
-    await update.message.reply_text('Help!')
+    chat_map = {}
+    chat_ids = env.group('TGEB_CHATID_')
+    for k, v in chat_ids.items():
+        profiles = v.split(',')
+        k = int(k)
+        chat_map[k] = []
+        for profile in profiles:
+            if profile not in ebs:
+                raise Exception(f'{profile} not defined, review your environment')
+            chat_map[k].append(ebs[profile])
 
-
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the user message."""
-    await update.message.reply_text(update.message.text)
+    return chat_map
 
 
 def main() -> None:
     """Start the bot."""
-    # Create the Application and pass it your bot's token.
-    application = Application.builder().token(os.getenv('TGEB_TOKEN')).build()
 
-    # on different commands - answer in Telegram
-    application.add_handler(CommandHandler('start', start))
-    application.add_handler(CommandHandler('help', help_command))
+    chat_ids = setup_educabiz()
 
-    # on non command i.e message - echo the message on Telegram
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
-
-    # Run the bot until the user presses Ctrl-C
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    bot = Bot(
+        env('TGEB_TOKEN'),
+        webhook_port=env('TGEB_WEBHOOK_PORT', 9999),
+        webhook_url=env('TGEB_WEBHOOK_URL'),
+        chat_ids=chat_ids,
+    )
+    bot.run()
 
 
 if __name__ == '__main__':
