@@ -113,13 +113,16 @@ class Bot:
             # FIXME: remove print()s over proper checks
             if tail == ['checkin']:
                 print(eb.child_check_in(child_id))
+                print(f'{update.effective_user.id} checked IN {child_id}')
                 return await query.edit_message_caption('Checked in 📚')
             elif tail == ['checkout']:
                 print(eb.child_check_out(child_id))
+                print(f'{update.effective_user.id} checked OUT {child_id}')
                 return await query.edit_message_caption('Checked out 🏠')
             if tail == ['sickleave']:
                 # FIXME: make absent note configurable?
                 print(eb.child_absent(child_id, 'Doente'))
+                print(f'{update.effective_user.id} marked {child_id} as absent')
                 return await query.edit_message_caption('Absent 🤢')
         await query.edit_message_caption('Unknown choice ❓')
 
