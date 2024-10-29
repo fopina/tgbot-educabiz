@@ -153,12 +153,12 @@
         },
         "educabiz": {
             "hashes": [
-                "sha256:17ef24afebe74f23a640ee640c18953014aaaa9d26460c35d8e53d9f6349d9f1",
-                "sha256:eee092f61989ec1c21b36cc8d4d80b4447ca36d55dc6cbcc45d301ba32fe7a84"
+                "sha256:10036214c7aad95100db853fee2d78a571ed230e200a1baa72d21a6275d631ab",
+                "sha256:488573f39ca8032f8177deea6aac523e1b2e5cf6ee12932486b630acc1abe9f6"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==0.0.4"
+            "version": "==0.0.5"
         },
         "exceptiongroup": {
             "hashes": [
