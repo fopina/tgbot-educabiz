@@ -85,10 +85,13 @@ class Bot:
                 )
 
     def setup_app(self) -> Application:
-        application = Application.builder().token(self._token).build()
+        application = Application.builder().token(self._token).post_init(self.post_init).build()
         application.add_handler(CommandHandler('start', self.start))
         application.add_handler(CallbackQueryHandler(self.handle_buttons))
         return application
+
+    async def post_init(self, application: Application) -> None:
+        await application.bot.set_my_commands([('start', 'Show kids')])
 
     async def handle_buttons(self, update: Update, context: CallbackContext) -> None:
         """Parses the CallbackQuery and updates the message text."""
