@@ -21,14 +21,12 @@ def setup_educabiz():
 
     for k, v in logins.items():
         profile, key = k.split('_', 1)
-
-        # FIXME: update python-educabiz to make this prettier (init with login?)
         if profile not in ebs:
-            ebs[profile] = Client()
+            ebs[profile] = [None, None]
         if key == 'USERNAME':
-            ebs[profile]._username = v
+            ebs[profile][0] = v
         elif key == 'PASSWORD':
-            ebs[profile]._password = v
+            ebs[profile][1] = v
 
     chat_map = {}
     chat_ids = env.group('TGEB_CHATID_')
@@ -37,9 +35,15 @@ def setup_educabiz():
         k = int(k)
         chat_map[k] = []
         for profile in profiles:
-            if profile not in ebs:
+            c = ebs.get(profile)
+            if c is None:
                 raise Exception(f'{profile} not defined, review your environment')
-            chat_map[k].append(ebs[profile])
+            if not isinstance(c, Client):
+                if not all(c):
+                    raise Exception(f'{profile} missing username or password')
+                c = Client(c[0], c[1], login_if_required=True)
+                ebs[profile] = c
+            chat_map[k].append(c)
 
     return chat_map
 

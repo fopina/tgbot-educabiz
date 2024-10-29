@@ -1,7 +1,6 @@
 #!/usr/bin/env -S python3 -u
 
 
-import html
 import uuid
 from functools import lru_cache
 from typing import TYPE_CHECKING
@@ -35,13 +34,12 @@ class Bot:
         return self._chat_ids.get(user.id) or []
 
     @lru_cache
-    def get_child_photo(self, eb, child_id):
+    def get_child_photo(self, eb: 'EBClient', child_id):
         x = eb.home()
-        for c, cd in x['children'].items():
-            if c == child_id:
-                url = cd['photo']
-                photo_bytes = requests.get(url)
-                return photo_bytes.content
+        if child_id in x.children:
+            url = x.children[child_id].photo
+            photo_bytes = requests.get(url)
+            return photo_bytes.content
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Send a message when the command /start is issued."""
@@ -51,41 +49,34 @@ class Bot:
         ebs = self.get_chat_ids(user)
         for ebi, eb in enumerate(ebs):
             data = eb.school_qrcodeinfo()
-            # FIXME: add proper checks/exceptions to python-educabiz
-            if data.get('formAction') == 'https://mobile.educabiz.com/authenticate':
-                # FIXME: simpler login without params
-                eb.login(eb._username, eb._password)
-                data = eb.school_qrcodeinfo()
-            for child in data['child'].values():
-                child_id = child['id']
-                name = html.unescape(child['name'])
-                assert len(child['presence']) == 1
-                presence = child['presence'][0]
-                photo = self.get_child_photo(eb, child_id)
-                if presence['id'] == 'undefined':
+            for child in data.child.values():
+                assert len(child.presence) == 1
+                presence = child.presence[0]
+                photo = self.get_child_photo(eb, child.id)
+                if presence.id == 'undefined':
                     # undefined -> check in / absent
                     presence_str = '(none)'
                     buttons = [
-                        InlineKeyboardButton('check in', callback_data=f'presence {ebi} {child_id} checkin'),
-                        InlineKeyboardButton('sick leave', callback_data=f'presence {ebi} {child_id} sickleave'),
+                        InlineKeyboardButton('check in', callback_data=f'presence {ebi} {child.id} checkin'),
+                        InlineKeyboardButton('sick leave', callback_data=f'presence {ebi} {child.id} sickleave'),
                     ]
                 elif presence['absent']:
                     # absent -> nil
-                    presence_str = f'absent ({presence["notes"]})'
+                    presence_str = f'absent ({presence.notes})'
                     buttons = []
-                elif presence['hourOut'] == '--:--':
+                elif not presence['hourOut']:
                     # check in -> check out
-                    presence_str = f'checked in at {presence["hourIn"]}'
+                    presence_str = f'checked in at {presence.hourIn}'
                     buttons = [
-                        InlineKeyboardButton('check out', callback_data=f'presence {ebi} {child_id} checkout'),
+                        InlineKeyboardButton('check out', callback_data=f'presence {ebi} {child.id} checkout'),
                     ]
                 else:
                     # check out -> nil
-                    presence_str = f'checked in at {presence["hourIn"]} and out at {presence["hourOut"]}'
+                    presence_str = f'checked in at {presence.hourIn} and out at {presence.hourOut}'
                     buttons = []
                 await update.message.reply_photo(
                     photo=photo,
-                    caption=rf"""Nome: {name}
+                    caption=rf"""Nome: {child.name}
 {presence_str}
                     """,
                     reply_markup=InlineKeyboardMarkup(
