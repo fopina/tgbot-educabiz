@@ -60,11 +60,11 @@ class Bot:
                         InlineKeyboardButton('check in', callback_data=f'presence {ebi} {child.id} checkin'),
                         InlineKeyboardButton('sick leave', callback_data=f'presence {ebi} {child.id} sickleave'),
                     ]
-                elif presence['absent']:
+                elif presence.absent:
                     # absent -> nil
                     presence_str = f'absent ({presence.notes})'
                     buttons = []
-                elif not presence['hourOut']:
+                elif not presence.hourOut:
                     # check in -> check out
                     presence_str = f'checked in at {presence.hourIn}'
                     buttons = [
