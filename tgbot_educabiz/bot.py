@@ -23,12 +23,14 @@ class Bot:
         webhook_url: str = None,
         webhook_port: int = None,
         chat_ids: dict[str, list['EBClient']] = None,
+        absent_note: str = None,
     ):
         self._token = token
         self._webhook_url = webhook_url
         self._webhook_port = webhook_port
         self._secret_token = uuid.uuid4()
         self._chat_ids = chat_ids
+        self._absent_note = absent_note
 
     def is_authorized(self, user: User):
         return user is not None and user.id in self._chat_ids
@@ -170,8 +172,7 @@ class Bot:
                 logger.info(f'{update.effective_user.id} checked OUT {child_id}')
                 return await query.edit_message_caption('Checked out 🏠')
             if tail == 'sickleave':
-                # FIXME: make absent note configurable?
-                logger.debug('ABSENT RESPONSE: %s', eb.child_absent(child_id, 'Doente'))
+                logger.debug('ABSENT RESPONSE: %s', eb.child_absent(child_id, self._absent_note or ''))
                 logger.info(f'{update.effective_user.id} marked {child_id} as absent')
                 return await query.edit_message_caption('Absent 🤢')
         await query.edit_message_caption('Unknown choice ❓')

@@ -60,6 +60,7 @@ def main() -> None:
         webhook_port=env('TGEB_WEBHOOK_PORT', 9999),
         webhook_url=env('TGEB_WEBHOOK_URL'),
         chat_ids=chat_ids,
+        absent_note=env('TGEB_ABSENT_DEFAULT_NOTE'),
     )
     bot.run()
 
