@@ -5,9 +5,9 @@ import uuid
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
-import requests
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, User
 from telegram.ext import Application, CallbackContext, CallbackQueryHandler, CommandHandler, ContextTypes
+from telegram.helpers import escape_markdown
 
 if TYPE_CHECKING:
     from educabiz.client import Client as EBClient
@@ -38,8 +38,7 @@ class Bot:
         x = eb.home()
         if child_id in x.children:
             url = x.children[child_id].photo
-            photo_bytes = requests.get(url)
-            return photo_bytes.content
+            return url
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Send a message when the command /start is issued."""
@@ -57,18 +56,19 @@ class Bot:
                 if presence.id == 'undefined':
                     # undefined -> check in / absent
                     action_str = 'none'
-                    presence_str = '(none)'
-
+                    presence_str = ''
                 elif presence.absent:
                     # absent -> nil
-                    presence_str = f'absent ({presence.notes})'
+                    presence_str = '🤢 Absent'
+                    if presence.notes:
+                        presence_str += f' - {presence.notes}'
                 elif not presence.hourOut:
                     action_str = 'in'
                     # check in -> check out
-                    presence_str = f'checked in at {presence.hourIn}'
+                    presence_str = f'🛬 Checked in at {presence.hourIn}'
                 else:
                     # check out -> nil
-                    presence_str = f'checked in at {presence.hourIn} and out at {presence.hourOut}'
+                    presence_str = f'🛬 Check in: {presence.hourIn}\n🚶‍♂️ Check out: {presence.hourOut}'
 
                 if action_str:
                     reply_markup = InlineKeyboardMarkup(
@@ -83,13 +83,19 @@ class Bot:
                 else:
                     reply_markup = None
 
-                await update.message.reply_photo(
-                    photo=photo,
-                    caption=rf"""Nome: {child.name}
-{presence_str}
-                    """,
-                    reply_markup=reply_markup,
-                )
+                message = f"""\
+*Nome*: {child.name}
+{escape_markdown(presence_str, version=2)}"""
+
+                if photo is None:
+                    return await update.message.reply_markdown_v2(
+                        message,
+                        reply_markup=reply_markup,
+                    )
+                else:
+                    await update.message.reply_photo(
+                        photo=photo, caption=message, reply_markup=reply_markup, parse_mode='MarkdownV2'
+                    )
 
     def setup_app(self) -> Application:
         application = Application.builder().token(self._token).post_init(self.post_init).build()
@@ -150,18 +156,18 @@ class Bot:
     async def handle_buttons_presence(self, opts: str, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
         if opts:
-            ebi, child_id, *tail = opts[0].split(' ', 2)
+            ebi, child_id, tail = opts[0].split(' ', 2)
             eb: 'EBClient' = self.get_chat_ids(update.effective_user)[int(ebi)]
             # FIXME: remove print()s over proper checks
-            if tail == ['checkin']:
+            if tail == 'checkin':
                 print(eb.child_check_in(child_id))
                 print(f'{update.effective_user.id} checked IN {child_id}')
                 return await query.edit_message_caption('Checked in 📚')
-            elif tail == ['checkout']:
+            elif tail == 'checkout':
                 print(eb.child_check_out(child_id))
                 print(f'{update.effective_user.id} checked OUT {child_id}')
                 return await query.edit_message_caption('Checked out 🏠')
-            if tail == ['sickleave']:
+            if tail == 'sickleave':
                 # FIXME: make absent note configurable?
                 print(eb.child_absent(child_id, 'Doente'))
                 print(f'{update.effective_user.id} marked {child_id} as absent')
