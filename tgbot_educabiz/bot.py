@@ -53,35 +53,42 @@ class Bot:
                 assert len(child.presence) == 1
                 presence = child.presence[0]
                 photo = self.get_child_photo(eb, child.id)
+                action_str = None
                 if presence.id == 'undefined':
                     # undefined -> check in / absent
+                    action_str = 'none'
                     presence_str = '(none)'
-                    buttons = [
-                        InlineKeyboardButton('check in', callback_data=f'presence {ebi} {child.id} checkin'),
-                        InlineKeyboardButton('sick leave', callback_data=f'presence {ebi} {child.id} sickleave'),
-                    ]
+
                 elif presence.absent:
                     # absent -> nil
                     presence_str = f'absent ({presence.notes})'
-                    buttons = []
                 elif not presence.hourOut:
+                    action_str = 'in'
                     # check in -> check out
                     presence_str = f'checked in at {presence.hourIn}'
-                    buttons = [
-                        InlineKeyboardButton('check out', callback_data=f'presence {ebi} {child.id} checkout'),
-                    ]
                 else:
                     # check out -> nil
                     presence_str = f'checked in at {presence.hourIn} and out at {presence.hourOut}'
-                    buttons = []
+
+                if action_str:
+                    reply_markup = InlineKeyboardMarkup(
+                        [
+                            [
+                                InlineKeyboardButton(
+                                    '📋 Actions', callback_data=f'actions {ebi} {child.id} {action_str}'
+                                ),
+                            ]
+                        ]
+                    )
+                else:
+                    reply_markup = None
+
                 await update.message.reply_photo(
                     photo=photo,
                     caption=rf"""Nome: {child.name}
 {presence_str}
                     """,
-                    reply_markup=InlineKeyboardMarkup(
-                        [buttons, [InlineKeyboardButton('cancel', callback_data='ignore')]]
-                    ),
+                    reply_markup=reply_markup,
                 )
 
     def setup_app(self) -> Application:
@@ -99,11 +106,46 @@ class Bot:
         await query.answer()
         cmd, *opts = query.data.split(' ', 1)
         if cmd == 'ignore':
-            await query.edit_message_reply_markup()
-            return
+            return await query.edit_message_reply_markup()
+        if cmd == 'actions':
+            return await self.handle_buttons_actions(opts, update, context)
         if cmd == 'presence':
             return await self.handle_buttons_presence(opts, update, context)
-        await query.edit_message_caption('Unknown choice...?')
+        return await query.edit_message_caption('Unknown choice...?')
+
+    async def handle_buttons_actions(self, opts: str, update: Update, context: CallbackContext) -> None:
+        query = update.callback_query
+        if opts:
+            ebi, child_id, action = opts[0].split(' ', 2)
+            if action == 'none':
+                return await query.edit_message_reply_markup(
+                    reply_markup=InlineKeyboardMarkup(
+                        [
+                            [
+                                InlineKeyboardButton('🛬 Check in', callback_data=f'presence {ebi} {child_id} checkin'),
+                                InlineKeyboardButton(
+                                    '🤢 Sick leave', callback_data=f'presence {ebi} {child_id} sickleave'
+                                ),
+                            ],
+                            [InlineKeyboardButton('✖️ Dismiss', callback_data='ignore')],
+                        ]
+                    )
+                )
+            if action == 'in':
+                return await query.edit_message_reply_markup(
+                    reply_markup=InlineKeyboardMarkup(
+                        [
+                            [
+                                InlineKeyboardButton(
+                                    '🚶‍♂️Check out', callback_data=f'presence {ebi} {child_id} checkout'
+                                ),
+                            ],
+                            [InlineKeyboardButton('✖️ Dismiss', callback_data='ignore')],
+                        ]
+                    )
+                )
+
+        await query.edit_message_caption('Unknown choice ❓')
 
     async def handle_buttons_presence(self, opts: str, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
