@@ -1,6 +1,7 @@
 #!/usr/bin/env -S python3 -u
 
 
+import logging
 import uuid
 from functools import lru_cache
 from typing import TYPE_CHECKING
@@ -12,6 +13,8 @@ from telegram.helpers import escape_markdown
 if TYPE_CHECKING:
     from educabiz.client import Client as EBClient
 
+logger = logging.getLogger(__name__)
+
 
 class Bot:
     def __init__(
@@ -20,12 +23,14 @@ class Bot:
         webhook_url: str = None,
         webhook_port: int = None,
         chat_ids: dict[str, list['EBClient']] = None,
+        absent_note: str = None,
     ):
         self._token = token
         self._webhook_url = webhook_url
         self._webhook_port = webhook_port
         self._secret_token = uuid.uuid4()
         self._chat_ids = chat_ids
+        self._absent_note = absent_note
 
     def is_authorized(self, user: User):
         return user is not None and user.id in self._chat_ids
@@ -158,19 +163,17 @@ class Bot:
         if opts:
             ebi, child_id, tail = opts[0].split(' ', 2)
             eb: 'EBClient' = self.get_chat_ids(update.effective_user)[int(ebi)]
-            # FIXME: remove print()s over proper checks
             if tail == 'checkin':
-                print(eb.child_check_in(child_id))
-                print(f'{update.effective_user.id} checked IN {child_id}')
+                logger.debug('CHECKIN RESPONSE: %s', eb.child_check_in(child_id))
+                logger.info(f'{update.effective_user.id} checked IN {child_id}')
                 return await query.edit_message_caption('Checked in 📚')
             elif tail == 'checkout':
-                print(eb.child_check_out(child_id))
-                print(f'{update.effective_user.id} checked OUT {child_id}')
+                logger.debug('CHECKOUT RESPONSE: %s', eb.child_check_out(child_id))
+                logger.info(f'{update.effective_user.id} checked OUT {child_id}')
                 return await query.edit_message_caption('Checked out 🏠')
             if tail == 'sickleave':
-                # FIXME: make absent note configurable?
-                print(eb.child_absent(child_id, 'Doente'))
-                print(f'{update.effective_user.id} marked {child_id} as absent')
+                logger.debug('ABSENT RESPONSE: %s', eb.child_absent(child_id, self._absent_note or ''))
+                logger.info(f'{update.effective_user.id} marked {child_id} as absent')
                 return await query.edit_message_caption('Absent 🤢')
         await query.edit_message_caption('Unknown choice ❓')
 

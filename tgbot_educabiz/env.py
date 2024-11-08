@@ -3,7 +3,7 @@ from pathlib import Path
 
 import dotenv
 
-dotenv.load_dotenv()
+dotenv.load_dotenv('.env.app')
 
 
 class Env:
