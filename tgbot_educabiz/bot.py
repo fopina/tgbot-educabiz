@@ -4,8 +4,9 @@
 import logging
 import uuid
 from functools import lru_cache
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
+from pydantic import BaseModel, Field, field_validator
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, User
 from telegram.ext import Application, CallbackContext, CallbackQueryHandler, CommandHandler, ContextTypes
 from telegram.helpers import escape_markdown
@@ -164,17 +165,26 @@ class Bot:
             ebi, child_id, tail = opts[0].split(' ', 2)
             eb: 'EBClient' = self.get_chat_ids(update.effective_user)[int(ebi)]
             if tail == 'checkin':
-                logger.debug('CHECKIN RESPONSE: %s', eb.child_check_in(child_id))
+                r = eb.child_check_in(child_id)
+                logger.debug('CHECKIN RESPONSE: %s', r)
+                cd = PresenceCheck.model_validate(r)
                 logger.info(f'{update.effective_user.id} checked IN {child_id}')
-                return await query.edit_message_caption('Checked in 📚')
+                return await query.edit_message_caption(f'🛬 Checked in at {cd.entry_in.time}')
             elif tail == 'checkout':
-                logger.debug('CHECKOUT RESPONSE: %s', eb.child_check_out(child_id))
+                r = eb.child_check_out(child_id)
+                logger.debug('CHECKOUT RESPONSE: %s', r)
+                cd = PresenceCheck.model_validate(r)
                 logger.info(f'{update.effective_user.id} checked OUT {child_id}')
-                return await query.edit_message_caption('Checked out 🏠')
+                return await query.edit_message_caption(
+                    f'🛬 Check in: {cd.entry_in.time}\n🚶‍♂️ Check out: {cd.entry_out.time}'
+                )
             if tail == 'sickleave':
-                logger.debug('ABSENT RESPONSE: %s', eb.child_absent(child_id, self._absent_note or ''))
+                # FIXME: update once a sample is available
+                r = eb.child_absent(child_id, self._absent_note or '')
+                logger.debug('ABSENT RESPONSE: %s', r)
+                cd = PresenceCheck.model_validate(r)
                 logger.info(f'{update.effective_user.id} marked {child_id} as absent')
-                return await query.edit_message_caption('Absent 🤢')
+                return await query.edit_message_caption('🤢 Absent')
         await query.edit_message_caption('Unknown choice ❓')
 
     def run(self):
@@ -190,3 +200,42 @@ class Bot:
             )
         else:
             application.run_polling(allowed_updates=Update.ALL_TYPES)
+
+
+class PresenceCheckEntry(BaseModel):
+    """
+    TODO: move this to python-educabiz instead!
+
+    {'time': '09:35', 'hour': 9, 'minutes': 35, 'fetcher': 'Pai'}
+    """
+
+    model_config = {'extra': 'allow'}
+
+    time: str = None
+
+    @field_validator('time')
+    def parse_hours(cls, value):
+        if value == '--:--':
+            return ''
+        return value
+
+
+class PresenceCheck(BaseModel):
+    """
+    TODO: move this to python-educabiz instead!
+
+    Examples of responses
+
+    Check out:
+    {'isAbsent': False, 'hasIn': True, 'hasOut': True, 'hasNotes': False, 'isLate': True, 'late': '09:11', 'isEarly': False, 'early': '00:00', 'islatepenaltyin': False, 'islatepenaltyout': False, 'in': {'time': '09:35', 'hour': 9, 'minutes': 35, 'fetcher': 'Pai'}, 'out': {'time': '17:11', 'hour': 17, 'minutes': 11, 'fetcher': 'Mãe'}}"
+    Check in:
+    {'isAbsent': False, 'hasIn': True, 'hasOut': False, 'hasNotes': False, 'isLate': False, 'isEarly': True, 'early': '00:00', 'islatepenaltyin': False, 'islatepenaltyout': False, 'in': {'time': '09:52', 'hour': 9, 'minutes': 52, 'fetcher': 'Pai'}, 'out': {'time': '--:--', 'hour': 0, 'minutes': 0, 'fetcher': ''}}"
+    """
+
+    model_config = {'extra': 'allow'}
+
+    isAbsent: bool = False
+    hasIn: bool = False
+    hasOut: bool = False
+    entry_in: Optional[PresenceCheckEntry] = Field(default=None, alias='in')
+    entry_out: Optional[PresenceCheckEntry] = Field(default=None, alias='out')
