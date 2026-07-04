@@ -4,6 +4,7 @@
 
 * `pytest` for tests: `make test`
 * `ruff` for linting/formatting: `make lint` (replaces both `black` and `isort`)
+* `uv` for dependency and virtualenv management (`uv sync --dev`)
 * `.github` with actions ready to test PRs and publish releases
 
 ## New project checklist
