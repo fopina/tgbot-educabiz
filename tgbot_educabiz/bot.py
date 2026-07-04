@@ -169,14 +169,17 @@ class Bot:
                 logger.debug('CHECKIN RESPONSE: %s', r)
                 cd = PresenceCheck.model_validate(r)
                 logger.info(f'{update.effective_user.id} checked IN {child_id}')
-                return await query.edit_message_caption(f'🛬 Checked in at {cd.entry_in.time}')
+                fetcher = f' by {cd.entry_in.fetcher}' if cd.entry_in.fetcher else ''
+                return await query.edit_message_caption(f'🛬 Checked in at {cd.entry_in.time}{fetcher}')
             elif tail == 'checkout':
                 r = eb.child_check_out(child_id)
                 logger.debug('CHECKOUT RESPONSE: %s', r)
                 cd = PresenceCheck.model_validate(r)
                 logger.info(f'{update.effective_user.id} checked OUT {child_id}')
+                fetcher_in = f' by {cd.entry_in.fetcher}' if cd.entry_in and cd.entry_in.fetcher else ''
+                fetcher_out = f' by {cd.entry_out.fetcher}' if cd.entry_out and cd.entry_out.fetcher else ''
                 return await query.edit_message_caption(
-                    f'🛬 Check in: {cd.entry_in.time}\n🚶‍♂️ Check out: {cd.entry_out.time}'
+                    f'🛬 Check in: {cd.entry_in.time}{fetcher_in}\n🚶‍♂️ Check out: {cd.entry_out.time}{fetcher_out}'
                 )
             if tail == 'sickleave':
                 # FIXME: update once a sample is available
@@ -212,6 +215,7 @@ class PresenceCheckEntry(BaseModel):
     model_config = {'extra': 'allow'}
 
     time: str = None
+    fetcher: str = None
 
     @field_validator('time')
     def parse_hours(cls, value):
