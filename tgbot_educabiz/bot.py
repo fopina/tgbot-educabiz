@@ -94,7 +94,7 @@ class Bot:
 {escape_markdown(presence_str, version=2)}"""
 
                 if photo is None:
-                    return await update.message.reply_markdown_v2(
+                    await update.message.reply_markdown_v2(
                         message,
                         reply_markup=reply_markup,
                     )
