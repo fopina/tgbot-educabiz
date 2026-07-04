@@ -40,13 +40,17 @@ class Test(Base):
         co = PresenceCheck.model_validate(check_out_response)
         self.assertEqual(co.hasIn, True)
         self.assertEqual(co.hasOut, True)
+        self.assertEqual(co.entry_in.fetcher, 'Pai')
         self.assertEqual(co.entry_out.time, '17:11')
+        self.assertEqual(co.entry_out.fetcher, 'Mãe')
 
         ci = PresenceCheck.model_validate(check_in_response)
         self.assertEqual(ci.hasIn, True)
         self.assertEqual(ci.hasOut, False)
         self.assertEqual(ci.entry_in.time, '09:52')
+        self.assertEqual(ci.entry_in.fetcher, 'Pai')
         self.assertEqual(ci.entry_out.time, '')
+        self.assertEqual(ci.entry_out.fetcher, '')
 
     def test_start_continues_after_child_without_photo(self):
         def child(child_id, name):
