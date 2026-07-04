@@ -1,9 +1,17 @@
 lint:
-	ruff format
-	ruff check --fix
+	uv run ruff format
+	uv run ruff check --fix
+
+lint-check:
+	uv run ruff format --diff
+	uv run ruff check
 
 test:
-	python -m pytest --cov
+	if [ -n "$(GITHUB_RUN_ID)" ]; then \
+		uv run pytest --cov --cov-report=xml --junitxml=junit.xml -o junit_family=legacy; \
+	else \
+		uv run python -m pytest --cov; \
+	fi
 
 build:
 	docker buildx build \

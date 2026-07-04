@@ -1,3 +1,40 @@
+[build-system]
+requires = ["setuptools>=69.5.0,<80.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tgbot-educabiz"
+authors = [{name="Filipe Pina", email="shelf-corncob-said@duck.com" }]
+dynamic = ["version"]
+description = "Telegram bot for Educabiz"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "educabiz",
+    "pydantic",
+    "python-dotenv",
+    "python-telegram-bot[webhooks]",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+]
+
+[project.urls]
+Homepage = "https://github.com/fopina/tgbot-educabiz"
+
+[project.scripts]
+tgbot-educabiz = "tgbot_educabiz.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["tgbot_educabiz*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "tgbot_educabiz.__version__"}
+
 [tool.ruff]
 line-length = 120
 indent-width = 4
