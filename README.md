@@ -24,6 +24,9 @@ names with commas.
 
 ## Using Multiple Schools
 
+This note is copied from the
+[`python-educabiz` README](https://github.com/fopina/python-educabiz#using-multiple-schools).
+
 Educabiz does not provide a way to choose the school during login, matching the
 behavior of the Educabiz mobile app.
 
