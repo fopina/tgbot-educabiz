@@ -1,4 +1,5 @@
 import asyncio
+import json
 from types import SimpleNamespace
 from unittest import mock
 
@@ -83,3 +84,8 @@ class Test(Base):
         message.reply_photo.assert_awaited_once()
         self.assertIn('First Child', message.reply_markdown_v2.await_args.args[0])
         self.assertIn('Second Child', message.reply_photo.await_args.kwargs['caption'])
+
+    def test_webhook_secret_token_is_json_serializable(self):
+        bot = Bot(token='token', chat_ids={})
+
+        json.dumps({'secret_token': bot._secret_token})

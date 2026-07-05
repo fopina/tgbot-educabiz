@@ -81,8 +81,4 @@ to the corresponding `TGEB_LOGIN_<profile>_USERNAME` and
 
 ## Development
 
-```sh
-uv sync --dev
-make test
-make lint
-```
+Check [CONTRIBUTING.md](CONTRIBUTING.md)
