@@ -2,18 +2,10 @@
 
 import logging
 
-from educabiz.client import Client as _EducabizClient
+from educabiz.client import Client
 
 from .bot import Bot
 from .env import env
-
-
-class Client(_EducabizClient):
-    def request(self, *args, **kwargs):
-        response = super().request(*args, **kwargs)
-        if response.content.startswith(b'\xef\xbb\xbf'):
-            response.encoding = 'utf-8-sig'
-        return response
 
 
 def setup_educabiz():
