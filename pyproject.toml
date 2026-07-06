@@ -10,7 +10,7 @@ description = "Telegram bot for Educabiz"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "educabiz>=0.0.6",
+    "educabiz>=0.0.7",
     "pydantic",
     "python-dotenv",
     "python-telegram-bot[webhooks]",
