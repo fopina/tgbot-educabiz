@@ -23,12 +23,14 @@ class Bot:
         token: str,
         webhook_url: str = None,
         webhook_port: int = None,
+        webhook_listen: str = None,
         chat_ids: dict[str, list['EBClient']] = None,
         absent_note: str = None,
     ):
         self._token = token
         self._webhook_url = webhook_url
         self._webhook_port = webhook_port
+        self._webhook_listen = webhook_listen
         self._secret_token = str(uuid.uuid4())
         self._chat_ids = chat_ids
         self._absent_note = absent_note
@@ -197,6 +199,7 @@ class Bot:
             # TODO: check with upstream if random secret_token should not be handled BY DEFAULT
             application.run_webhook(
                 port=self._webhook_port,
+                listen=self._webhook_listen,
                 webhook_url=self._webhook_url,
                 secret_token=self._secret_token,
                 allowed_updates=Update.ALL_TYPES,

@@ -89,3 +89,24 @@ class Test(Base):
         bot = Bot(token='token', chat_ids={})
 
         json.dumps({'secret_token': bot._secret_token})
+
+    def test_run_webhook_uses_configured_listen_address(self):
+        bot = Bot(
+            token='token',
+            webhook_url='https://example.invalid/webhook',
+            webhook_port=8080,
+            webhook_listen='127.0.0.1',
+            chat_ids={},
+        )
+        application = mock.Mock()
+
+        with mock.patch.object(bot, 'setup_app', return_value=application):
+            bot.run()
+
+        application.run_webhook.assert_called_once()
+        self.assertEqual(application.run_webhook.call_args.kwargs['port'], 8080)
+        self.assertEqual(application.run_webhook.call_args.kwargs['listen'], '127.0.0.1')
+        self.assertEqual(
+            application.run_webhook.call_args.kwargs['webhook_url'],
+            'https://example.invalid/webhook',
+        )

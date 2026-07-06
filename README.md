@@ -36,13 +36,15 @@ Supported settings:
 | `TGEB_ABSENT_DEFAULT_NOTE` | No | | Note sent when marking a child absent/sick. |
 | `TGEB_WEBHOOK_URL` | No | | Public webhook URL. When set, the bot uses Telegram webhooks instead of polling. |
 | `TGEB_WEBHOOK_PORT` | No | `9999` | Local port used by the webhook server. |
+| `TGEB_WEBHOOK_LISTEN` | No | | Local address used by the webhook server. |
 
 The `_FILE` suffix works for all of these variables, including grouped
 variables such as `TGEB_LOGIN_SCHOOL1_PASSWORD_FILE` or
 `TGEB_CHATID_123456789_FILE`.
 
 Without `TGEB_WEBHOOK_URL`, the bot runs with Telegram long polling. With
-`TGEB_WEBHOOK_URL`, it starts a webhook server on `TGEB_WEBHOOK_PORT`.
+`TGEB_WEBHOOK_URL`, it starts a webhook server on `TGEB_WEBHOOK_PORT`. Set
+`TGEB_WEBHOOK_LISTEN` to choose the local address the webhook server binds to.
 
 ## Using Multiple Schools
 
