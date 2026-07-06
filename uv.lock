@@ -257,15 +257,15 @@ toml = [
 
 [[package]]
 name = "educabiz"
-version = "0.0.6"
+version = "0.0.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fd/6f/6ff19cd130d3218ebcf38ab6a2ff3809f475e3a7916e3896518e90793e05/educabiz-0.0.6.tar.gz", hash = "sha256:d22d92c99fa24884888ea1ce884558fa8ca53787704ee46931a8669fd21abab3", size = 6408, upload-time = "2026-07-04T09:56:24.848Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/10/3e/5746b45b763a9d5f9e36c2a38aee1138dc7e68f8917022897a0758494e27/educabiz-0.0.7.tar.gz", hash = "sha256:4342c55cce084f66262d0af0eb59cdb481301a176d814bb94c06832cc0776722", size = 6544, upload-time = "2026-07-06T11:10:28.371Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/88/506055d3a97ec63f5cad5ac96f19beb0b724dda57daaba0975c9fad1c57f/educabiz-0.0.6-py3-none-any.whl", hash = "sha256:dad1a785ee936ccfb0ba31b994f2b431d5821f9c6a034690fd5060e97bd796a1", size = 6715, upload-time = "2026-07-04T09:56:23.911Z" },
+    { url = "https://files.pythonhosted.org/packages/12/5d/10a4bb6adac035b851223d23e8376d03a2b73a23c3c4162691dc09175dbc/educabiz-0.0.7-py3-none-any.whl", hash = "sha256:e9e00e8a988c387be8fe1ad41fb8827024d14f7c327de499b7557e474f5b9c59", size = 6737, upload-time = "2026-07-06T11:10:27.461Z" },
 ]
 
 [[package]]
@@ -611,7 +611,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "educabiz", specifier = ">=0.0.6" },
+    { name = "educabiz", specifier = ">=0.0.7" },
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "python-telegram-bot", extras = ["webhooks"] },
