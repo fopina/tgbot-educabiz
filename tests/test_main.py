@@ -24,3 +24,12 @@ class Test(Base):
         self.assertEqual(chats, {11111: [mock.ANY, mock.ANY]})
         self.assertEqual(chats[11111][0]._username, 'u1')
         self.assertEqual(chats[11111][1]._username, 'u2')
+
+    def test_main_defaults_webhook_listen_to_localhost(self):
+        os.environ.update({'TGEB_TOKEN': 'token'})
+
+        with mock.patch.object(tgmain, 'setup_educabiz', return_value={}), mock.patch.object(tgmain, 'Bot') as bot_class:
+            tgmain.main()
+
+        self.assertEqual(bot_class.call_args.kwargs['webhook_listen'], '127.0.0.1')
+        bot_class.return_value.run.assert_called_once()

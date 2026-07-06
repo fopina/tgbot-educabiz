@@ -16,6 +16,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+EDUCABIZ_ERROR_MESSAGE = 'Some error occurred while talking to Educabiz. Please try again later.'
+
 
 class Bot:
     def __init__(
@@ -48,6 +50,16 @@ class Bot:
             url = x.children[child_id].photo
             return url
 
+    async def reply_educabiz_error(self, update: Update) -> None:
+        if update.message:
+            await update.message.reply_text(EDUCABIZ_ERROR_MESSAGE)
+
+    async def edit_educabiz_error(self, query) -> None:
+        if getattr(getattr(query, 'message', None), 'caption', None) is None:
+            await query.edit_message_text(EDUCABIZ_ERROR_MESSAGE)
+        else:
+            await query.edit_message_caption(EDUCABIZ_ERROR_MESSAGE)
+
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Send a message when the command /start is issued."""
         user = update.effective_user
@@ -55,11 +67,22 @@ class Bot:
             return
         ebs = self.get_chat_ids(user)
         for ebi, eb in enumerate(ebs):
-            data = eb.school_qrcodeinfo()
+            try:
+                data = eb.school_qrcodeinfo()
+            except Exception:
+                logger.exception('Failed to fetch Educabiz QR code info for user %s', user.id)
+                await self.reply_educabiz_error(update)
+                continue
+
             for child in data.child.values():
                 assert len(child.presence) == 1
                 presence = child.presence[0]
-                photo = self.get_child_photo(eb, child.id)
+                try:
+                    photo = self.get_child_photo(eb, child.id)
+                except Exception:
+                    logger.exception('Failed to fetch Educabiz child photo for user %s child %s', user.id, child.id)
+                    await self.reply_educabiz_error(update)
+                    photo = None
                 action_str = None
                 if presence.id == 'undefined':
                     # undefined -> check in / absent
@@ -167,14 +190,24 @@ class Bot:
             ebi, child_id, tail = opts[0].split(' ', 2)
             eb: 'EBClient' = self.get_chat_ids(update.effective_user)[int(ebi)]
             if tail == 'checkin':
-                r = eb.child_check_in(child_id)
+                try:
+                    r = eb.child_check_in(child_id)
+                except Exception:
+                    logger.exception('Failed to check in Educabiz child %s for user %s', child_id, update.effective_user.id)
+                    return await self.edit_educabiz_error(query)
                 logger.debug('CHECKIN RESPONSE: %s', r)
                 cd = PresenceCheck.model_validate(r)
                 logger.info(f'{update.effective_user.id} checked IN {child_id}')
                 fetcher = f' by {cd.entry_in.fetcher}' if cd.entry_in.fetcher else ''
                 return await query.edit_message_caption(f'🛬 Checked in at {cd.entry_in.time}{fetcher}')
             elif tail == 'checkout':
-                r = eb.child_check_out(child_id)
+                try:
+                    r = eb.child_check_out(child_id)
+                except Exception:
+                    logger.exception(
+                        'Failed to check out Educabiz child %s for user %s', child_id, update.effective_user.id
+                    )
+                    return await self.edit_educabiz_error(query)
                 logger.debug('CHECKOUT RESPONSE: %s', r)
                 cd = PresenceCheck.model_validate(r)
                 logger.info(f'{update.effective_user.id} checked OUT {child_id}')
@@ -185,7 +218,13 @@ class Bot:
                 )
             if tail == 'sickleave':
                 # FIXME: update once a sample is available
-                r = eb.child_absent(child_id, self._absent_note or '')
+                try:
+                    r = eb.child_absent(child_id, self._absent_note or '')
+                except Exception:
+                    logger.exception(
+                        'Failed to mark Educabiz child %s absent for user %s', child_id, update.effective_user.id
+                    )
+                    return await self.edit_educabiz_error(query)
                 logger.debug('ABSENT RESPONSE: %s', r)
                 cd = PresenceCheck.model_validate(r)
                 logger.info(f'{update.effective_user.id} marked {child_id} as absent')
