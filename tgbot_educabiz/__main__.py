@@ -58,7 +58,7 @@ def main() -> None:
     bot = Bot(
         env('TGEB_TOKEN'),
         webhook_port=env('TGEB_WEBHOOK_PORT', 9999),
-        webhook_listen=env('TGEB_WEBHOOK_LISTEN', '127.0.0.1'),
+        webhook_listen=env('TGEB_WEBHOOK_LISTEN'),
         webhook_url=env('TGEB_WEBHOOK_URL'),
         chat_ids=chat_ids,
         absent_note=env('TGEB_ABSENT_DEFAULT_NOTE'),
