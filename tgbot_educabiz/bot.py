@@ -29,7 +29,7 @@ class Bot:
         self._token = token
         self._webhook_url = webhook_url
         self._webhook_port = webhook_port
-        self._secret_token = uuid.uuid4()
+        self._secret_token = str(uuid.uuid4())
         self._chat_ids = chat_ids
         self._absent_note = absent_note
 
